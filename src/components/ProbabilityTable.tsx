@@ -24,7 +24,7 @@ export default function ProbabilityTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-mist-400">
+          <tr className="border-b border-felt-600 text-left font-mono text-[11px] uppercase tracking-wider text-ink-500">
             <th className="py-3 pr-4 font-semibold">k</th>
             <th className="py-3 pr-4 text-right font-semibold">P(X = k)</th>
             <th className="py-3 pr-4 text-right font-semibold">P(X ≥ k)</th>
@@ -39,32 +39,34 @@ export default function ProbabilityTable({
             return (
               <tr
                 key={point.k}
-                className={`border-b border-white/5 transition ${
+                className={`border-b border-felt-700/70 transition ${
                   selected
-                    ? 'bg-gold-300/10 text-white'
-                    : 'text-mist-200 hover:bg-white/5'
+                    ? 'bg-signal-500/10 text-ink-100'
+                    : 'text-ink-300 hover:bg-felt-800/60'
                 }`}
               >
                 <td className="py-2.5 pr-4">
                   <span
-                    className={`inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 text-xs font-bold ${
-                      selected ? 'bg-gold-300 text-abyss-900' : 'bg-abyss-700 text-mist-200'
+                    className={`inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 font-mono text-xs font-semibold ${
+                      selected
+                        ? 'bg-signal-500 text-paper'
+                        : 'bg-felt-700 text-ink-300'
                     }`}
                   >
                     {point.k}
                   </span>
                 </td>
                 <td
-                  className={`py-2.5 pr-4 text-right font-semibold tabular-nums ${
-                    selected ? 'text-gold-300' : 'text-white'
+                  className={`py-2.5 pr-4 text-right font-mono font-semibold tabular-nums ${
+                    selected ? 'text-signal-400' : 'text-ink-100'
                   }`}
                 >
                   {formatProbability(point.p, 5)}
                 </td>
-                <td className="py-2.5 pr-4 text-right tabular-nums">
+                <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-ink-400">
                   {formatProbability(atLeast, 5)}
                 </td>
-                <td className="py-2.5 text-right tabular-nums">
+                <td className="py-2.5 text-right font-mono tabular-nums text-ink-400">
                   {formatProbability(atMost, 5)}
                 </td>
               </tr>

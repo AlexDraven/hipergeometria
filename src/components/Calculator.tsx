@@ -28,11 +28,10 @@ interface FieldProps {
   max: number
   hint: string
   error?: string
-  accent: string
   onChange: (v: number) => void
 }
 
-function Field({ id, label, value, min, max, hint, error, accent, onChange }: FieldProps) {
+function Field({ id, label, value, min, max, hint, error, onChange }: FieldProps) {
   const [text, setText] = useState(String(value))
 
   useEffect(() => {
@@ -46,9 +45,9 @@ function Field({ id, label, value, min, max, hint, error, accent, onChange }: Fi
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex items-end justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-mist-200">
+        <label htmlFor={id} className="text-sm font-medium text-ink-200">
           {label}
         </label>
         <div className="flex items-center gap-2">
@@ -60,12 +59,10 @@ function Field({ id, label, value, min, max, hint, error, accent, onChange }: Fi
             max={max}
             value={text}
             onChange={(e) => commit(e.target.value)}
-            className="w-20 rounded-lg border border-white/10 bg-abyss-800/70 px-2 py-1 text-right font-semibold text-white outline-none transition focus:border-arcana-400/60 focus:ring-2 focus:ring-arcana-500/30"
+            className="w-20 rounded border border-felt-600 bg-felt-950/60 px-2 py-1 text-right font-mono font-semibold text-ink-100 outline-none transition focus:border-signal-500/70"
             aria-invalid={error ? true : undefined}
           />
-          <span
-            className={`rounded-full bg-gradient-to-br px-2.5 py-1 text-xs font-bold tabular-nums ${accent}`}
-          >
+          <span className="rounded border border-felt-600 bg-felt-800 px-2 py-1 font-mono text-xs font-semibold tabular-nums text-ink-200">
             {value}
           </span>
         </div>
@@ -78,11 +75,11 @@ function Field({ id, label, value, min, max, hint, error, accent, onChange }: Fi
         step={1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="aria-invalid:ring-2 aria-invalid:ring-ember-500/50"
+        className="aria-invalid:ring-2 aria-invalid:ring-signal-500/40"
       />
 
-      <p className="text-xs text-mist-400">{hint}</p>
-      {error && <p className="text-xs font-medium text-ember-400">{error}</p>}
+      <p className="text-xs text-ink-500">{hint}</p>
+      {error && <p className="text-xs font-medium text-signal-400">{error}</p>}
     </div>
   )
 }
@@ -118,9 +115,9 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
 
   return (
     <section className="panel p-6" aria-label="Parámetros del cálculo">
-      <h2 className="panel-title mb-4">Mazo</h2>
+      <h2 className="panel-title mb-5">Mazo</h2>
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {PRESETS.map((preset) => {
           const active = preset.N === N && preset.K === K
           return (
@@ -128,16 +125,19 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
               key={preset.label}
               type="button"
               onClick={() => applyPreset(preset)}
-              className={`group rounded-xl border px-3 py-2 text-left transition ${
+              aria-pressed={active}
+              className={`rounded border px-3 py-2 text-left transition ${
                 active
-                  ? 'border-arcana-400/60 bg-arcana-500/20 shadow-lg shadow-arcana-600/20'
-                  : 'border-white/10 bg-white/5 hover:border-arcana-400/40 hover:bg-white/10'
+                  ? 'border-paper bg-paper text-paper-ink shadow-sm'
+                  : 'border-felt-600 bg-felt-800/60 text-ink-200 hover:border-ink-400 hover:bg-felt-800'
               }`}
             >
-              <span className="block text-sm font-semibold text-white">
-                {preset.label}
+              <span className="block text-sm font-semibold">{preset.label}</span>
+              <span
+                className={`block text-xs ${active ? 'text-paper-ink/60' : 'text-ink-500'}`}
+              >
+                {preset.detail}
               </span>
-              <span className="block text-xs text-mist-400">{preset.detail}</span>
             </button>
           )
         })}
@@ -152,7 +152,6 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
           max={200}
           hint="Tamaño total del mazo (N)"
           error={errorFor('N')}
-          accent="from-cyan-400 to-blue-500 text-white"
           onChange={(v) => setField('N', v)}
         />
         <Field
@@ -163,7 +162,6 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
           max={N}
           hint="Ejemplares que te interesan (K)"
           error={errorFor('K')}
-          accent="from-arcana-400 to-fuchsia-500 text-white"
           onChange={(v) => setField('K', v)}
         />
         <Field
@@ -174,7 +172,6 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
           max={N}
           hint="Mano inicial o total robado (n)"
           error={errorFor('n')}
-          accent="from-ember-400 to-rose-600 text-white"
           onChange={(v) => setField('n', v)}
         />
         <Field
@@ -185,7 +182,6 @@ export default function Calculator({ params, errors, onChange }: CalculatorProps
           max={Math.min(K, n)}
           hint="Objetivo de copias en tu mano (k)"
           error={errorFor('k')}
-          accent="from-gold-300 to-amber-500 text-abyss-900"
           onChange={(v) => setField('k', v)}
         />
       </div>

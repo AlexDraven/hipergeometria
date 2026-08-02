@@ -11,6 +11,8 @@ const WIDTH = 640
 const HEIGHT = 280
 const PAD = { top: 24, right: 16, bottom: 36, left: 48 }
 
+const MONO = 'IBM Plex Mono, ui-monospace, Menlo, monospace'
+
 export default function DistributionChart({
   points,
   selectedK,
@@ -18,8 +20,8 @@ export default function DistributionChart({
 }: DistributionChartProps) {
   if (points.length === 0) {
     return (
-      <div className="flex h-56 items-center justify-center text-sm text-mist-400">
-        Sin datos para mostrar.
+      <div className="flex h-56 items-center justify-center font-mono text-sm text-ink-500">
+        Ajusta los parámetros para ver la distribución.
       </div>
     )
   }
@@ -47,7 +49,7 @@ export default function DistributionChart({
               x2={WIDTH - PAD.right}
               y1={y}
               y2={y}
-              stroke="rgba(255,255,255,0.08)"
+              stroke="rgba(205,196,178,0.12)"
               strokeDasharray="4 4"
             />
             <text
@@ -55,7 +57,8 @@ export default function DistributionChart({
               y={y + 4}
               textAnchor="end"
               fontSize={11}
-              fill="#9d8fc0"
+              fontFamily={MONO}
+              fill="#7d7566"
             >
               {formatProbability(maxP * f, 4)}
             </text>
@@ -68,19 +71,31 @@ export default function DistributionChart({
         const x = PAD.left + i * slot + (slot - barW) / 2
         const h = Math.max((point.p / maxP) * plotH, point.p > 0 ? 2 : 1)
         const y = PAD.top + plotH - h
-        const gradientId = `bar-${selected ? 'sel' : 'base'}`
 
         return (
-          <g key={point.k} onClick={() => onSelect(point.k)} className="cursor-pointer">
+          <g
+            key={point.k}
+            role="button"
+            tabIndex={0}
+            aria-label={`k = ${point.k}, ${formatProbability(point.p, 6)}`}
+            className="cursor-pointer"
+            onClick={() => onSelect(point.k)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onSelect(point.k)
+              }
+            }}
+          >
             <rect
               x={x}
               y={y}
               width={barW}
               height={h}
-              rx={6}
-              fill={`url(#${gradientId})`}
-              opacity={selected ? 1 : 0.75}
-              className={`bar-animate transition ${selected ? '' : 'hover:opacity-100'}`}
+              rx={3}
+              fill={selected ? '#d2461f' : '#3b3629'}
+              opacity={selected ? 1 : 0.9}
+              className={`bar-animate transition-opacity ${selected ? '' : 'hover:opacity-100'}`}
             />
             <rect
               x={PAD.left + i * slot}
@@ -96,19 +111,20 @@ export default function DistributionChart({
               <g>
                 <rect
                   x={x - 6}
-                  y={Math.max(8, y - 30)}
+                  y={Math.max(8, y - 28)}
                   width={barW + 12}
-                  height={22}
-                  rx={6}
-                  fill="#fbbf24"
+                  height={20}
+                  rx={3}
+                  fill="#f4eee0"
                 />
                 <text
                   x={x + barW / 2}
-                  y={Math.max(24, y - 14)}
+                  y={Math.max(22, y - 14)}
                   textAnchor="middle"
-                  fontSize={12}
-                  fontWeight={700}
-                  fill="#0d0a1a"
+                  fontSize={11}
+                  fontFamily={MONO}
+                  fontWeight={600}
+                  fill="#1e1a14"
                 >
                   {formatProbability(point.p, 5)}
                 </text>
@@ -120,25 +136,15 @@ export default function DistributionChart({
               y={HEIGHT - 12}
               textAnchor="middle"
               fontSize={12}
-              fontWeight={selected ? 700 : 500}
-              fill={selected ? '#fcd34d' : '#9d8fc0'}
+              fontFamily={MONO}
+              fontWeight={selected ? 600 : 500}
+              fill={selected ? '#d2461f' : '#7d7566'}
             >
               {point.k}
             </text>
           </g>
         )
       })}
-
-      <defs>
-        <linearGradient id="bar-base" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#a855f7" />
-        </linearGradient>
-        <linearGradient id="bar-sel" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="#d97706" />
-          <stop offset="100%" stopColor="#fbbf24" />
-        </linearGradient>
-      </defs>
     </svg>
   )
 }

@@ -4,7 +4,6 @@ import {
   distribution,
   hypergeometricCdfAtLeast,
   hypergeometricCdfAtMost,
-  hypergeometricPmf,
   validateParams,
 } from './lib/hypergeometric'
 import Calculator from './components/Calculator'
@@ -25,7 +24,6 @@ function App() {
   const errors = useMemo(() => validateParams(params), [params])
   const hasErrors = errors.length > 0
 
-  const pmf = useMemo(() => hypergeometricPmf(params), [params])
   const atLeast = useMemo(() => hypergeometricCdfAtLeast(params), [params])
   const atMost = useMemo(() => hypergeometricCdfAtMost(params), [params])
   const points = useMemo(() => distribution(N, K, n), [N, K, n])
@@ -36,20 +34,28 @@ function App() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-6xl flex-col px-4 py-10 sm:px-6">
-      <header className="mb-10">
-        <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-arcana-400/30 bg-arcana-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-arcana-300">
-          <span className="h-1.5 w-1.5 rounded-full bg-gold-300 shadow shadow-gold-300/50" />
-          Herramienta para TCG
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-          <span className="text-gradient">Calculadora</span>{' '}
-          <span className="text-white">Hipergeométrica</span>
-        </h1>
-        <p className="mt-3 max-w-2xl text-mist-400">
-          Saber la probabilidad de robar tus cartas clave es la base de todo mazo
-          competitivo. Modela tu robo sin reemplazo con la distribución
-          hipergeométrica.
-        </p>
+      <header className="mb-10 border-b border-felt-700 pb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-4 flex items-center gap-3 font-mono text-xs font-semibold uppercase tracking-[0.3em] text-ink-400">
+              <span className="h-px w-8 bg-signal-500" />
+              Herramienta para TCG
+            </p>
+            <h1 className="font-display text-4xl font-semibold leading-none tracking-tight text-ink-100 sm:text-6xl">
+              Calculadora <span className="italic">Hipergeométrica</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-400 sm:text-base">
+              Saber la probabilidad de robar tus cartas clave es la base de todo
+              mazo competitivo. Modela tu robo sin reemplazo con la distribución
+              hipergeométrica.
+            </p>
+          </div>
+          <p className="shrink-0 font-mono text-[11px] uppercase leading-relaxed tracking-[0.2em] text-ink-500 sm:pb-1 sm:text-right">
+            Sin backend
+            <br />
+            todo en tu navegador
+          </p>
+        </div>
       </header>
 
       <main className="grid gap-6 lg:grid-cols-[1fr_22rem]">
@@ -57,7 +63,6 @@ function App() {
 
         <div className="lg:sticky lg:top-6 lg:self-start">
           <ResultCard
-            pmf={pmf}
             atLeast={atLeast}
             atMost={atMost}
             k={k}
@@ -72,7 +77,7 @@ function App() {
       <section className="panel mt-6 p-6" aria-label="Distribución completa">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <h2 className="panel-title">Distribución completa</h2>
-          <p className="text-xs text-mist-400">
+          <p className="font-mono text-xs text-ink-500">
             Toca una barra para fijar el objetivo (k)
           </p>
         </div>
@@ -86,8 +91,8 @@ function App() {
         <ProbabilityTable points={points} selectedK={k} N={N} K={K} n={n} />
       </section>
 
-      <footer className="mt-10 pb-4 text-center text-xs text-mist-500">
-        Modelo hipergeométrico · sin backend, todo se calcula en tu navegador.
+      <footer className="mt-10 border-t border-felt-700 pt-6 text-center font-mono text-[11px] tracking-tight text-ink-500">
+        P(X = k) = C(K, k) · C(N − K, n − k) / C(N, n)
       </footer>
     </div>
   )

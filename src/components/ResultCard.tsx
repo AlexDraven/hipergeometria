@@ -1,8 +1,7 @@
-import { expectedValue } from '../lib/hypergeometric'
+import { expectedValue, hypergeometricCdfAtLeast } from '../lib/hypergeometric'
 import { formatProbability, oneInEvery } from '../lib/format'
 
 interface ResultCardProps {
-  pmf: number
   atLeast: number
   atMost: number
   k: number
@@ -13,7 +12,6 @@ interface ResultCardProps {
 }
 
 export default function ResultCard({
-  pmf,
   atLeast,
   atMost,
   k,
@@ -23,39 +21,61 @@ export default function ResultCard({
   hasErrors,
 }: ResultCardProps) {
   const exp = expectedValue({ N, K, n })
-  const odds = oneInEvery(pmf)
+  const atLeastOne = hypergeometricCdfAtLeast({ N, K, n, k: 1 })
+  const odds = oneInEvery(atLeastOne)
 
   return (
-    <div className="card-frame card-shimmer">
-      <div className="rounded-[1.15rem] bg-gradient-to-b from-abyss-800 to-abyss-900 p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="panel-title">Probabilidad exacta</h2>
-          <span className="rounded-full border border-gold-300/40 bg-gold-300/10 px-3 py-1 text-xs font-semibold text-gold-300">
-            {k} de {K} copias
-          </span>
-        </div>
-
-        <p className="text-gradient font-display text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
-          {hasErrors ? '—' : formatProbability(pmf, 5)}
+    <div className="paper-slip p-6">
+      <div className="flex items-center justify-between gap-4">
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-500">
+          Robar al menos una copia
         </p>
+        <span className="shrink-0 rounded border border-signal-500/50 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-signal-600">
+          {k} de {K} copias
+        </span>
+      </div>
 
-        {odds && !hasErrors && (
-          <p className="mt-1 text-sm text-mist-400">
-            Es decir, <span className="font-semibold text-mist-200">{odds}</span> mazos
-            como el tuyo
-          </p>
-        )}
+      <p className="mt-5 font-display text-6xl font-semibold leading-none tracking-tight sm:text-7xl">
+        {hasErrors ? '—' : formatProbability(atLeastOne, 5)}
+      </p>
 
-        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-          <Stat label="P(X ≥ k)" value={hasErrors ? '—' : formatProbability(atLeast, 5)} highlight />
-          <Stat label="P(X ≤ k)" value={hasErrors ? '—' : formatProbability(atMost, 5)} />
-          <Stat label="Esperado" value={hasErrors ? '—' : exp.toFixed(2)} />
-        </div>
+      {odds && !hasErrors ? (
+        <p className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="text-2xl font-semibold text-signal-600 sm:text-3xl">
+            {odds}
+          </span>
+          <span className="text-sm text-paper-ink/70">mazos como el tuyo</span>
+        </p>
+      ) : K === 0 ? (
+        <p className="mt-5 text-sm text-paper-ink/60">
+          No hay copias de esa carta en el mazo.
+        </p>
+      ) : (
+        <p className="mt-5 text-sm text-paper-ink/60">
+          Ajusta los parámetros para calcular.
+        </p>
+      )}
 
-        <p className="mt-4 border-t border-white/10 pt-4 text-xs leading-relaxed text-mist-400">
-          Modelo hipergeométrico: robas <strong className="text-mist-200">{n}</strong> de{' '}
-          <strong className="text-mist-200">{N}</strong> cartas sin reemplazo, buscando{' '}
-          <strong className="text-mist-200">{K}</strong> copias.
+      <div className="mt-6 grid grid-cols-3 gap-2.5">
+        <Stat label="P(X ≥ k)" value={hasErrors ? '—' : formatProbability(atLeast, 5)} highlight />
+        <Stat label="P(X ≤ k)" value={hasErrors ? '—' : formatProbability(atMost, 5)} />
+        <Stat label="E[X]" value={hasErrors ? '—' : exp.toFixed(2)} />
+      </div>
+
+      <div className="relative -mx-6 mt-6 border-t border-dashed border-paper-ink/30 px-6 pt-4">
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-felt-950"
+        />
+        <span
+          aria-hidden
+          className="absolute right-0 top-0 h-3 w-3 translate-x-1/2 -translate-y-1/2 rounded-full bg-felt-950"
+        />
+        <p className="text-xs leading-relaxed text-paper-ink/70">
+          Robas <strong className="font-semibold text-paper-ink">{n}</strong> de{' '}
+          <strong className="font-semibold text-paper-ink">{N}</strong> cartas sin
+          reemplazo, buscando <strong className="font-semibold text-paper-ink">{K}</strong>{' '}
+          copias.
         </p>
       </div>
     </div>
@@ -73,18 +93,18 @@ function Stat({
 }) {
   return (
     <div
-      className={`rounded-xl border px-2 py-3 ${
+      className={`rounded border px-2 py-3 ${
         highlight
-          ? 'border-arcana-400/50 bg-arcana-500/15'
-          : 'border-white/10 bg-white/5'
+          ? 'border-signal-500/50 bg-signal-500/10'
+          : 'border-paper-ink/15'
       }`}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-mist-400">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-paper-ink/60">
         {label}
       </p>
       <p
-        className={`mt-1 text-lg font-bold tabular-nums ${
-          highlight ? 'text-white' : 'text-mist-200'
+        className={`mt-1 font-mono text-base font-semibold tabular-nums ${
+          highlight ? 'text-signal-600' : 'text-paper-ink'
         }`}
       >
         {value}
