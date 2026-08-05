@@ -89,6 +89,93 @@ export function expectedValue(params: Pick<HypergeometricParams, 'N' | 'K' | 'n'
   return (n * K) / N
 }
 
+/** P(X ≥ 1): probabilidad de robar al menos una copia. */
+function pAtLeastOne(N: number, K: number, n: number): number {
+  return hypergeometricCdfAtLeast({ N, K, n, k: 1 })
+}
+
+export interface DrawCurvePoint {
+  /** Turno de la partida. */
+  t: number
+  /** Cartas acumuladas robadas hasta el turno t. */
+  totalDrawn: number
+  /** P de tener al menos 1 copia robada hasta el turno t. */
+  cumulative: number
+}
+
+/**
+ * Curva por turnos: robando `perTurn` cartas cada turno, ¿cuál es la
+ * probabilidad acumulada de tener al menos 1 copia en el turno t?
+ */
+export function drawCurve(N: number, K: number, perTurn: number): DrawCurvePoint[] {
+  if (!Number.isInteger(N) || N <= 0) return []
+  if (!Number.isInteger(K) || K < 0 || K > N) return []
+  if (!Number.isInteger(perTurn) || perTurn <= 0) return []
+  const points: DrawCurvePoint[] = []
+  for (let t = 1; t <= Math.ceil(N / perTurn); t++) {
+    const totalDrawn = Math.min(perTurn * t, N)
+    points.push({ t, totalDrawn, cumulative: pAtLeastOne(N, K, totalDrawn) })
+  }
+  return points
+}
+
+/**
+ * Probabilidad de robar al menos 1 copia de cada grupo de cartas distintas
+ * al robar n cartas. Se calcula por inclusión–exclusión sobre los grupos:
+ * P(∩ E_g) = 1 − Σ_{∅≠S⊆G} (−1)^(|S|+1) · C(N − Σ_{g∈S} K_g, n) / C(N, n)
+ */
+export function comboProbability(N: number, ks: number[], n: number): number {
+  if (!Number.isInteger(N) || N <= 0) return NaN
+  if (!Array.isArray(ks) || ks.length === 0) return NaN
+  for (const k of ks) {
+    if (!Number.isInteger(k) || k < 0 || k > N) return NaN
+  }
+  if (!Number.isInteger(n) || n < 0 || n > N) return NaN
+
+  const denom = combination(N, n)
+  if (!Number.isFinite(denom) || denom <= 0) return NaN
+
+  const total = 1 << ks.length
+  let union = 0
+  for (let mask = 1; mask < total; mask++) {
+    let removed = 0
+    let size = 0
+    for (let g = 0; g < ks.length; g++) {
+      if (mask & (1 << g)) {
+        removed += ks[g]
+        size++
+      }
+    }
+    const term = combination(N - removed, n) / denom
+    union += size % 2 === 1 ? term : -term
+  }
+  return Math.min(1, Math.max(0, 1 - union))
+}
+
+export interface MinimumCopiesResult {
+  /** Menor cantidad de copias que alcanza la probabilidad objetivo. */
+  copies: number
+  /** Probabilidad real que se logra con esa cantidad de copias. */
+  probability: number
+}
+
+/**
+ * Dado N y n, devuelve el menor K tal que P(X ≥ 1) ≥ target.
+ * La probabilidad crece con K, así que basta con recorrer de 0 a N.
+ */
+export function minimumCopies(N: number, n: number, target: number): MinimumCopiesResult {
+  if (!Number.isInteger(N) || N <= 0) return { copies: 0, probability: 0 }
+  if (!Number.isInteger(n) || n < 0 || n > N) return { copies: 0, probability: 0 }
+  if (!Number.isFinite(target)) return { copies: 0, probability: 0 }
+  const t = Math.min(1, Math.max(0, target))
+  if (t <= 0) return { copies: 0, probability: 0 }
+  for (let K = 0; K <= N; K++) {
+    const p = pAtLeastOne(N, K, n)
+    if (p >= t) return { copies: K, probability: p }
+  }
+  return { copies: N, probability: 1 }
+}
+
 /** Rango de valores de k con probabilidad no nula. */
 export function distributionRange(N: number, K: number, n: number): {
   from: number

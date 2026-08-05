@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  comboProbability,
   combination,
   distribution,
+  drawCurve,
   expectedValue,
   hypergeometricCdfAtLeast,
   hypergeometricCdfAtMost,
   hypergeometricPmf,
+  minimumCopies,
   validateParams,
 } from './hypergeometric'
 
@@ -94,5 +97,83 @@ describe('validateParams', () => {
 
   it('detecta n > N', () => {
     expect(validateParams({ N: 40, K: 4, n: 41, k: 1 })).not.toEqual([])
+  })
+})
+
+describe('drawCurve', () => {
+  it('con perTurn = 1 roba 1 carta por turno', () => {
+    const curve = drawCurve(10, 4, 1)
+    expect(curve).toHaveLength(10)
+    expect(curve[0].totalDrawn).toBe(1)
+    expect(curve[9].totalDrawn).toBe(10)
+  })
+
+  it('el último punto es P(X ≥ 1) con todo el mazo robado = 1', () => {
+    const curve = drawCurve(10, 3, 1)
+    expect(curve[curve.length - 1].cumulative).toBeCloseTo(1, 10)
+  })
+
+  it('la probabilidad acumulada nunca decrece', () => {
+    const curve = drawCurve(45, 4, 2)
+    for (let i = 1; i < curve.length; i++) {
+      expect(curve[i].cumulative).toBeGreaterThanOrEqual(curve[i - 1].cumulative - 1e-12)
+    }
+  })
+
+  it('devuelve [] con parámetros inválidos', () => {
+    expect(drawCurve(0, 4, 1)).toEqual([])
+    expect(drawCurve(10, -1, 1)).toEqual([])
+    expect(drawCurve(10, 4, 0)).toEqual([])
+  })
+})
+
+describe('comboProbability', () => {
+  it('con un solo grupo equivale a P(X ≥ 1)', () => {
+    const combo = comboProbability(40, [4], 7)
+    const single = hypergeometricCdfAtLeast({ N: 40, K: 4, n: 7, k: 1 })
+    expect(combo).toBeCloseTo(single, 10)
+  })
+
+  it('caso enumerable por fuerza bruta', () => {
+    // N=6, grupos A (2) y B (2), robo 4 de 6.
+    // Subconjuntos de 4 cartas: 15 en total. Fallan los que evitan A
+    // (1: las 2 de B + las 2 neutras) o evitan B (1). Válidos: 15 − 2 = 13.
+    const p = comboProbability(6, [2, 2], 4)
+    expect(p).toBeCloseTo(13 / 15, 10)
+  })
+
+  it('con n = N da 1', () => {
+    expect(comboProbability(20, [3, 5], 20)).toBeCloseTo(1, 10)
+  })
+
+  it('con n = 0 da 0', () => {
+    expect(comboProbability(20, [3, 5], 0)).toBe(0)
+  })
+
+  it('devuelve NaN con parámetros inválidos', () => {
+    expect(comboProbability(0, [1], 1)).toBeNaN()
+    expect(comboProbability(10, [], 1)).toBeNaN()
+    expect(comboProbability(10, [5], 11)).toBeNaN()
+  })
+})
+
+describe('minimumCopies', () => {
+  it('copias mínimas crecen con el objetivo', () => {
+    const low = minimumCopies(60, 7, 0.4)
+    const high = minimumCopies(60, 7, 0.8)
+    expect(high.copies).toBeGreaterThan(low.copies)
+  })
+
+  it('logra la probabilidad objetivo', () => {
+    const target = 0.6
+    const result = minimumCopies(45, 7, target)
+    expect(result.probability).toBeGreaterThanOrEqual(target)
+    expect(result.copies).toBeGreaterThanOrEqual(1)
+  })
+
+  it('con n = N alcanza el objetivo con 1 copia', () => {
+    const result = minimumCopies(10, 10, 0.5)
+    expect(result.copies).toBe(1)
+    expect(result.probability).toBe(1)
   })
 })

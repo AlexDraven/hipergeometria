@@ -13,6 +13,7 @@ const PRESETS: Preset[] = [
   { label: 'Commander', N: 99, K: 3, detail: 'Mazo de 99' },
   { label: 'Yu-Gi-Oh!', N: 40, K: 3, detail: 'Mazo principal' },
   { label: 'Pokémon', N: 60, K: 4, detail: 'Mazo de 60' },
+  { label: 'LairenTCG', N: 45, K: 4, detail: 'Reino de 45' },
 ]
 
 function clampInt(value: number, min: number, max: number): number {

@@ -1,5 +1,6 @@
 import { expectedValue, hypergeometricCdfAtLeast } from '../lib/hypergeometric'
 import { formatProbability, oneInEvery } from '../lib/format'
+import Tooltip from './Tooltip'
 
 interface ResultCardProps {
   atLeast: number
@@ -57,9 +58,22 @@ export default function ResultCard({
       )}
 
       <div className="mt-6 grid grid-cols-3 gap-2.5">
-        <Stat label="P(X ≥ k)" value={hasErrors ? '—' : formatProbability(atLeast, 5)} highlight />
-        <Stat label="P(X ≤ k)" value={hasErrors ? '—' : formatProbability(atMost, 5)} />
-        <Stat label="E[X]" value={hasErrors ? '—' : exp.toFixed(2)} />
+        <Stat
+          label="P(X ≥ k)"
+          value={hasErrors ? '—' : formatProbability(atLeast, 5)}
+          highlight
+          tooltip="Probabilidad de robar al menos k copias de la carta."
+        />
+        <Stat
+          label="P(X ≤ k)"
+          value={hasErrors ? '—' : formatProbability(atMost, 5)}
+          tooltip="Probabilidad de robar como máximo k copias de la carta."
+        />
+        <Stat
+          label="E[X]"
+          value={hasErrors ? '—' : exp.toFixed(2)}
+          tooltip="Copias promedio que vas a robar con esos parámetros."
+        />
       </div>
 
       <div className="relative -mx-6 mt-6 border-t border-dashed border-paper-ink/30 px-6 pt-4">
@@ -86,10 +100,12 @@ function Stat({
   label,
   value,
   highlight = false,
+  tooltip,
 }: {
   label: string
   value: string
   highlight?: boolean
+  tooltip?: string
 }) {
   return (
     <div
@@ -99,8 +115,9 @@ function Stat({
           : 'border-paper-ink/15'
       }`}
     >
-      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-paper-ink/60">
-        {label}
+      <p className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-paper-ink/60">
+        <span className="truncate">{label}</span>
+        {tooltip && <Tooltip text={tooltip} />}
       </p>
       <p
         className={`mt-1 font-mono text-base font-semibold tabular-nums ${
