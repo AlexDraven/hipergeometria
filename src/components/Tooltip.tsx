@@ -5,11 +5,24 @@ interface TooltipProps {
   text: string
   /** Símbolo del botón (por defecto "?"). */
   label?: string
+  /** Lado donde abre el globo (por defecto "top"). */
+  direction?: 'top' | 'bottom'
+  /** Alineación del globo respecto del botón (por defecto "center"). */
+  align?: 'left' | 'center' | 'right'
 }
 
-export default function Tooltip({ text, label = '?' }: TooltipProps) {
+export default function Tooltip({
+  text,
+  label = '?',
+  direction = 'top',
+  align = 'center',
+}: TooltipProps) {
   const [open, setOpen] = useState(false)
   const id = useId()
+
+  const directionClass = direction === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'
+  const alignClass =
+    align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
 
   return (
     <span className="relative inline-flex">
@@ -30,7 +43,7 @@ export default function Tooltip({ text, label = '?' }: TooltipProps) {
         <span
           id={id}
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-48 -translate-x-1/2 rounded border border-felt-600 bg-felt-900 p-2 text-xs font-normal normal-case leading-relaxed tracking-normal text-ink-200 shadow-lg"
+          className={`pointer-events-none absolute z-10 w-48 rounded border border-felt-600 bg-felt-900 p-2 text-xs font-normal normal-case leading-relaxed tracking-normal text-ink-200 shadow-lg ${directionClass} ${alignClass}`}
         >
           {text}
         </span>

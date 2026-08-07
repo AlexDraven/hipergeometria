@@ -1,9 +1,5 @@
 import { useMemo, useState } from 'react'
-import {
-  comboProbability,
-  drawCurve,
-  minimumCopies,
-} from '../lib/hypergeometric'
+import { comboProbability, drawCurve } from '../lib/hypergeometric'
 import { formatProbability } from '../lib/format'
 import CurveChart from './CurveChart'
 import type { CurvePoint } from './CurveChart'
@@ -32,9 +28,8 @@ export default function Tools({ N, K, n }: ToolsProps) {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
         <ComboPanel N={N} n={n} />
-        <MinCopiesPanel N={N} n={n} />
         <TurnCurvePanel N={N} K={K} />
       </div>
     </section>
@@ -140,51 +135,6 @@ function ComboPanel({ N, n }: { N: number; n: number }) {
   )
 }
 
-function MinCopiesPanel({ N, n }: { N: number; n: number }) {
-  const [draws, setDraws] = useState(n)
-  const [target, setTarget] = useState(50)
-
-  const result = useMemo(
-    () => minimumCopies(N, draws, target / 100),
-    [N, draws, target],
-  )
-
-  return (
-    <section className="panel p-6" aria-label="Copias necesarias">
-      <div className="mb-4">
-        <h3 className="panel-title">Copias necesarias</h3>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <NumField
-          id="mincopies-n"
-          label="Cartas robadas (n)"
-          value={draws}
-          min={0}
-          max={N}
-          onChange={setDraws}
-        />
-        <NumField
-          id="mincopies-target"
-          label="Probabilidad objetivo (%)"
-          value={target}
-          min={1}
-          max={100}
-          onChange={setTarget}
-        />
-      </div>
-
-      <p className="mt-5 font-display text-4xl font-semibold leading-none tracking-tight text-ink-100">
-        {result.copies} {result.copies === 1 ? 'copia' : 'copias'}
-      </p>
-      <p className="mt-1 text-xs text-ink-500">
-        Mínimo para alcanzar {target}% al robar {draws} de {N} (logra{' '}
-        {formatProbability(result.probability, 4)}).
-      </p>
-    </section>
-  )
-}
-
 function TurnCurvePanel({ N, K }: { N: number; K: number }) {
   const [perTurn, setPerTurn] = useState(1)
 
@@ -192,7 +142,7 @@ function TurnCurvePanel({ N, K }: { N: number; K: number }) {
   const points: CurvePoint[] = curve.map((p) => ({ x: p.t, y: p.cumulative }))
 
   return (
-    <section className="panel p-6 lg:col-span-2" aria-label="Curva por turnos">
+    <section className="panel p-6" aria-label="Curva por turnos">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 className="panel-title">Curva por turnos</h3>
         <div className="w-40">
