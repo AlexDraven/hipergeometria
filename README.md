@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# Calculadora Hipergeométrica
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Calculadora de probabilidades para juegos de cartas (TCG): modela el robo sin
+reemplazo con la distribución hipergeométrica.
 
-Currently, two official plugins are available:
+## Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Cálculo de P(X = k), P(X ≤ k) y P(X ≥ k) para un mazo (N), copias de la carta
+  (K), cartas robadas (n) y objetivo (k).
+- Presets para Magic, Commander, Yu-Gi-Oh!, Pokémon y LairenTCG.
+- Distribución completa con gráfico interactivo y tabla de probabilidades.
+- Herramientas: probabilidad de combos (varias cartas juntas) y curva por turnos.
+- Modo LairenTCG con curva de mulligan.
+- Persistencia en localStorage y enlace de compartir con el estado codificado en el hash.
+- UI en español, accesible y responsive.
 
-## React Compiler
+## Desarrollo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm install
+npm run dev      # servidor de desarrollo
+npm run test     # tests (vitest)
+npm run lint     # oxlint
+npm run build    # typecheck (tsc -b) + build de producción
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Despliegue
+
+Se publica en GitHub Pages desde la rama `main` vía GitHub Actions
+(`.github/workflows/deploy-pages.yml`). El `base` de Vite está fijado a
+`/calculadora-TCG/` para coincidir con la subruta del sitio.
+
+## Estructura
+
+- `src/lib/` — lógica pura (hipergeométrica, Lairen, persistencia, compartir) con tests colocalizados.
+- `src/components/` — componentes React; los gráficos son SVG hechos a mano.
+- `src/index.css` — configuración de Tailwind v4 (tokens de tema).
